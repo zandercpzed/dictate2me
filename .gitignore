@@ -1,0 +1,87 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+coverage.txt
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# AI Models (too large for git)
+models/*.gguf
+models/*.bin
+!models/.gitkeep
+
+# Config files with sensitive data
+configs/*.local.yaml
+configs/*.local.toml
+*.local.yaml
+*.local.toml
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Test data
+testdata/*.wav
+!testdata/audio/.gitkeep
+!testdata/text/.gitkeep
+
+# Air (hot reload)
+.air.toml
+tmp/
+
+# Coverage
+*.coverprofile
+
+# Profiling
+*.prof
+*.pprof
+
+# Debug
+debug
+__debug_bin
+
+# Local development
+.local/
