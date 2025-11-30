@@ -6,26 +6,35 @@
 //   - Voice Activity Detection (VAD) to detect speech segments
 //   - Audio format conversion (to WAV 16kHz mono 16-bit)
 //
-// The audio module is designed to be cross-platform, with platform-specific
-// implementations in platform_*.go files.
+// # Architecture
 //
-// Example usage:
+// The Capture struct manages the PortAudio stream and feeds data into a channel.
+// A RingBuffer is provided for scenarios requiring a sliding window of audio history.
+// VAD is implemented using a simple energy-based algorithm with hysteresis.
 //
-//	capture, err := audio.New(
-//	    audio.WithSampleRate(16000),
-//	    audio.WithChannels(1),
-//	)
+// # Usage
+//
+//	// Configure capture
+//	cfg := audio.DefaultConfig()
+//	cfg.SampleRate = 16000
+//
+//	// Create capture instance
+//	capture, err := audio.New(cfg)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
 //	defer capture.Close()
 //
+//	// Start capturing
 //	if err := capture.Start(); err != nil {
 //	    log.Fatal(err)
 //	}
 //
-//	for segment := range capture.Segments() {
-//	    // Process audio segment
-//	    fmt.Printf("Got audio segment: %d samples\n", len(segment.Data))
+//	// Consume audio stream
+//	for chunk := range capture.Stream() {
+//	    // Process audio chunk (e.g., feed to VAD or Whisper)
+//	    if vad.Process(chunk) {
+//	        // Speech detected
+//	    }
 //	}
 package audio

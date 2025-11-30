@@ -82,14 +82,40 @@ else
     echo -e "${GREEN}✓ govulncheck already installed${NC}"
 fi
 
+# Install PortAudio (System Dependency)
+echo -e "${CYAN}[6/8] Installing PortAudio...${NC}"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    if ! brew list portaudio &> /dev/null; then
+        brew install portaudio
+        echo -e "${GREEN}✓ PortAudio installed via Homebrew${NC}"
+    else
+        echo -e "${GREEN}✓ PortAudio already installed${NC}"
+    fi
+    
+    # Check for pkg-config (needed for CGO)
+    if ! command -v pkg-config &> /dev/null; then
+        brew install pkg-config
+        echo -e "${GREEN}✓ pkg-config installed${NC}"
+    fi
+else
+    # Linux assumption (Debian/Ubuntu)
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update
+        sudo apt-get install -y portaudio19-dev pkg-config
+        echo -e "${GREEN}✓ PortAudio installed via apt${NC}"
+    else
+        echo -e "${YELLOW}⚠ Please install PortAudio manually for your OS${NC}"
+    fi
+fi
+
 # Download Go dependencies
-echo -e "${CYAN}[6/7] Downloading Go dependencies...${NC}"
+echo -e "${CYAN}[7/8] Downloading Go dependencies...${NC}"
 go mod download
 go mod tidy
 echo -e "${GREEN}✓ Dependencies downloaded${NC}"
 
 # Setup pre-commit hooks (if pre-commit is installed)
-echo -e "${CYAN}[7/7] Setting up pre-commit hooks...${NC}"
+echo -e "${CYAN}[8/8] Setting up pre-commit hooks...${NC}"
 if command -v pre-commit &> /dev/null; then
     pre-commit install
     echo -e "${GREEN}✓ Pre-commit hooks installed${NC}"
