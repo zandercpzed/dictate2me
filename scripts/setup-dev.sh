@@ -108,6 +108,11 @@ else
     fi
 fi
 
+# Setup Vosk Library
+echo -e "${CYAN}[7/9] Setting up Vosk C Library...${NC}"
+./scripts/setup-vosk-lib.sh
+
+
 # Download Go dependencies
 echo -e "${CYAN}[7/8] Downloading Go dependencies...${NC}"
 go mod download

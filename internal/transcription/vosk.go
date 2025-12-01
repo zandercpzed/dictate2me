@@ -109,7 +109,7 @@ func (e *Engine) TranscribeStream(samples []int16) ([]Segment, error) {
 	// Accept waveform
 	state := e.recognizer.AcceptWaveform(data)
 
-	var segments []Segment
+	segments := []Segment{}
 
 	if state > 0 {
 		// Final result available

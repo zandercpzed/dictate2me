@@ -1,0 +1,112 @@
+# github.com/zandercpzed/dictate2me/internal/transcription.test
+ld: warning: ignoring duplicate libraries: '-lvosk'
+ld: warning: search path '/Users/zander/go/pkg/mod/github.com/alphacep/vosk-api/go@v0.3.45/../src' not found
+=== RUN   TestNew
+=== RUN   TestNew/valid_config
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+=== RUN   TestNew/missing_model_path
+=== RUN   TestNew/non-existent_model
+=== RUN   TestNew/default_values
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+--- PASS: TestNew (0.39s)
+    --- PASS: TestNew/valid_config (0.20s)
+    --- PASS: TestNew/missing_model_path (0.00s)
+    --- PASS: TestNew/non-existent_model (0.00s)
+    --- PASS: TestNew/default_values (0.19s)
+=== RUN   TestTranscribeStream
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+=== RUN   TestTranscribeStream/empty_samples
+=== RUN   TestTranscribeStream/silence_samples
+    vosk_test.go:123: 
+        	Error Trace:	/Users/zander/Library/CloudStorage/GoogleDrive-zander.cattapreta@zedicoes.com/My Drive/_ programação/_ dictate2me/dictate2me/internal/transcription/vosk_test.go:123
+        	Error:      	Expected value not to be nil.
+        	Test:       	TestTranscribeStream/silence_samples
+--- FAIL: TestTranscribeStream (0.27s)
+    --- PASS: TestTranscribeStream/empty_samples (0.00s)
+    --- FAIL: TestTranscribeStream/silence_samples (0.09s)
+=== RUN   TestPartialResult
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+--- PASS: TestPartialResult (0.18s)
+=== RUN   TestFinalResult
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+--- PASS: TestFinalResult (0.33s)
+=== RUN   TestReset
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+--- PASS: TestReset (0.29s)
+=== RUN   TestClose
+LOG (VoskAPI:ReadDataFiles():model.cc:213) Decoding params beam=13 max-active=7000 lattice-beam=6
+LOG (VoskAPI:ReadDataFiles():model.cc:216) Silence phones 1:2:3:4:5:6:7:8:9:10
+LOG (VoskAPI:RemoveOrphanNodes():nnet-nnet.cc:948) Removed 1 orphan nodes.
+LOG (VoskAPI:RemoveOrphanComponents():nnet-nnet.cc:847) Removing 2 orphan components.
+LOG (VoskAPI:Collapse():nnet-utils.cc:1488) Added 1 components, removed 2
+LOG (VoskAPI:ReadDataFiles():model.cc:248) Loading i-vector extractor from ../../models/vosk-model-small-pt-0.3/ivector/final.ie
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:183) Computing derived variables for iVector extractor
+LOG (VoskAPI:ComputeDerivedVars():ivector-extractor.cc:204) Done.
+LOG (VoskAPI:ReadDataFiles():model.cc:282) Loading HCL and G from ../../models/vosk-model-small-pt-0.3/HCLr.fst ../../models/vosk-model-small-pt-0.3/Gr.fst
+LOG (VoskAPI:ReadDataFiles():model.cc:303) Loading winfo ../../models/vosk-model-small-pt-0.3/word_boundary.int
+--- PASS: TestClose (0.17s)
+=== RUN   TestInt16ToBytes
+=== RUN   TestInt16ToBytes/empty
+=== RUN   TestInt16ToBytes/single_sample
+=== RUN   TestInt16ToBytes/multiple_samples
+--- PASS: TestInt16ToBytes (0.00s)
+    --- PASS: TestInt16ToBytes/empty (0.00s)
+    --- PASS: TestInt16ToBytes/single_sample (0.00s)
+    --- PASS: TestInt16ToBytes/multiple_samples (0.00s)
+FAIL
+FAIL	github.com/zandercpzed/dictate2me/internal/transcription	1.868s
+FAIL
