@@ -81,10 +81,10 @@ audio:
   vad: WebRTC VAD ou Silero VAD (via ONNX)
 
 transcription:
-  engine: whisper.cpp (via CGO bindings)
-  model_default: whisper-small (otimizado para português)
-  model_quality: whisper-medium (opcional, maior precisão)
-  quantization: Q5_K_M ou Q4_K_M
+  engine: Vosk (via vosk-api Go bindings)
+  model_default: vosk-model-small-pt-0.3 (50MB, otimizado para português)
+  model_quality: vosk-model-pt-fb-v0.1.1-20220516_2113 (1.6GB, maior precisão)
+  features: streaming API, zero-latency, reconfigurable vocabulary
 
 correction:
   engine: llama.cpp (via go-llama.cpp ou ollama)
