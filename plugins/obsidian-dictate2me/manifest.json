@@ -1,0 +1,10 @@
+{
+  "id": "dictate2me",
+  "name": "Dictate2Me",
+  "version": "0.1.0",
+  "minAppVersion": "0.15.0",
+  "description": "Voice dictation with local AI transcription and correction. Fully offline, privacy-first.",
+  "author": "dictate2me contributors",
+  "authorUrl": "https://github.com/zandercpzed/dictate2me",
+  "isDesktopOnly": true
+}

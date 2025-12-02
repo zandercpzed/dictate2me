@@ -19,11 +19,12 @@
 ## ✨ Funcionalidades
 
 - 🎤 **Captura de Áudio** - Gravação em tempo real do microfone
-- 📝 **Transcrição Offline** - Powered by Whisper, sem enviar dados para nuvem
-- ✏️ **Correção Inteligente** - LLM local para gramática, sintaxe e pontuação
-- 🔌 **Integração com Obsidian** - Plugin nativo para inserção direta
+- 📝 **Transcrição Offline** - Powered by Vosk, sem enviar dados para nuvem
+- ✏️ **Correção Inteligente** - LLM local (Ollama) para gramática, sintaxe e pontuação
+- 🔌 **Integração com Obsidian** - Plugin nativo para inserção direta (em breve)
 - 🖥️ **Cross-Platform** - macOS, Windows e Linux (em breve)
 - 🔒 **Privacidade Total** - Seus dados nunca saem do seu computador
+- 🌐 **API REST Local** - Integração com editores via HTTP/WebSocket 🆕
 
 ## 🚀 Instalação
 
@@ -58,20 +59,49 @@ make build
 ### 1. Baixar Modelos de IA
 
 ```bash
-dictate2me models download
+# Baixar modelo de transcrição Vosk
+./scripts/download-vosk-models.sh small
+
+# Instalar e configurar Ollama para correção de texto
+./scripts/setup-ollama.sh
 ```
 
 ### 2. Iniciar Gravação
 
 ```bash
+# Com correção de texto (requer Ollama)
 dictate2me start
+
+# Sem correção de texto
+dictate2me start --no-correction
 ```
 
-### 3. Transcrever Arquivo
+### 3. Transcrever Arquivo (em breve)
 
 ```bash
 dictate2me transcribe audio.wav --output texto.txt
 ```
+
+### 4. Usar API REST (para integrações)
+
+```bash
+# Iniciar daemon em background
+dictate2me-daemon &
+
+# A API estará disponível em http://localhost:8765
+# Token salvo em ~/.dictate2me/api-token
+
+# Testar health check
+curl http://localhost:8765/api/v1/health
+
+# Corrigir texto via API
+curl -X POST http://localhost:8765/api/v1/correct \
+  -H "Authorization: Bearer $(cat ~/.dictate2me/api-token)" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "olá mundo"}'
+```
+
+Veja a [documentação completa da API](docs/API.md) para mais detalhes.
 
 ## 📚 Documentação
 
@@ -94,9 +124,11 @@ Contribuições são bem-vindas! Por favor, leia nosso [Guia de Contribuição](
 
 ## 📊 Status do Projeto
 
-🚧 **Em Desenvolvimento Ativo** - Fase 0: Bootstrap (Semana 1)
+🚀 **Em Desenvolvimento Ativo** - Fase 4: API REST Completa ✅
 
-Veja o [CHANGELOG.md](CHANGELOG.md) para histórico de versões.
+Próxima fase: Plugin Obsidian
+
+Veja o [STATUS.md](STATUS.md) para detalhes do progresso.
 
 ## 📄 Licença
 
@@ -104,8 +136,8 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 ## 🙏 Agradecimentos
 
-- [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) - Motor de transcrição
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) - Inferência de LLM
+- [Vosk](https://alphacephei.com/vosk/) - Motor de transcrição offline
+- [Ollama](https://ollama.com/) - Gerenciador de LLMs locais
 - [Obsidian](https://obsidian.md/) - Editor de notas
 - [PortAudio](http://www.portaudio.com/) - Cross-platform audio I/O
 

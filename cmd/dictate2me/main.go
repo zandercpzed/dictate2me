@@ -23,13 +23,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/zandercpzed/dictate2me/internal/audio"
+	"github.com/zandercpzed/dictate2me/internal/correction"
 	"github.com/zandercpzed/dictate2me/internal/transcription"
 )
 
@@ -64,9 +67,11 @@ func main() {
 func runStart(args []string) {
 	fs := flag.NewFlagSet("start", flag.ExitOnError)
 	modelPath := fs.String("model", "models/vosk-model-small-pt-0.3", "Path to Vosk model")
+	noCorrection := fs.Bool("no-correction", false, "Disable text correction with LLM")
+	ollamaModel := fs.String("ollama-model", "gemma2:2b", "Ollama model for correction")
 	fs.Parse(args)
 
-	fmt.Printf("Loading model from: %s\n", *modelPath)
+	fmt.Printf("Loading transcription model from: %s\n", *modelPath)
 
 	// Init Audio
 	capture, err := audio.New(audio.DefaultConfig())
@@ -77,7 +82,7 @@ func runStart(args []string) {
 	defer capture.Close()
 
 	// Init Transcription
-	engine, err := transcription.New(transcription.Config{
+	transEngine, err := transcription.New(transcription.Config{
 		ModelPath:  *modelPath,
 		SampleRate: 16000,
 		Language:   "pt",
@@ -86,7 +91,32 @@ func runStart(args []string) {
 		fmt.Printf("Error initializing transcription: %v\n", err)
 		os.Exit(1)
 	}
-	defer engine.Close()
+	defer transEngine.Close()
+
+	// Init Correction (optional)
+	var corrEngine *correction.Engine
+	if !*noCorrection {
+		corrEngine, err = correction.New(correction.Config{
+			Model: *ollamaModel,
+		})
+		if err != nil {
+			fmt.Printf("Error initializing correction: %v\n", err)
+			os.Exit(1)
+		}
+		defer corrEngine.Close()
+
+		// Health check
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := corrEngine.HealthCheck(ctx); err != nil {
+			cancel()
+			fmt.Printf("⚠️  Ollama health check failed: %v\n", err)
+			fmt.Println("   Running without correction. Install Ollama or use --no-correction flag.")
+			corrEngine = nil
+		} else {
+			cancel()
+			fmt.Printf("✓ Correction engine ready (model: %s)\n", *ollamaModel)
+		}
+	}
 
 	// Start Capture
 	if err := capture.Start(); err != nil {
@@ -96,6 +126,10 @@ func runStart(args []string) {
 	defer capture.Stop()
 
 	fmt.Println("🎤 Listening... (Press Ctrl+C to stop)")
+	if corrEngine != nil {
+		fmt.Println("✏️  Text correction enabled")
+	}
+	fmt.Println()
 
 	// Handle signals
 	sigCh := make(chan os.Signal, 1)
@@ -109,20 +143,42 @@ func runStart(args []string) {
 				if !ok {
 					return
 				}
-				segments, err := engine.TranscribeStream(samples)
+				segments, err := transEngine.TranscribeStream(samples)
 				if err != nil {
 					fmt.Printf("Error transcribing: %v\n", err)
 					continue
 				}
 				for _, seg := range segments {
+					transcribed := seg.Text
+					finalText := transcribed
+
+					// Apply correction if available
+					if corrEngine != nil && transcribed != "" {
+						ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+						corrected, corrErr := corrEngine.Correct(ctx, transcribed)
+						cancel()
+
+						if corrErr != nil {
+							fmt.Printf("⚠️  Correction error: %v\n", corrErr)
+						} else {
+							finalText = corrected
+						}
+					}
+
 					// Clear line and print final result
-					fmt.Printf("\r\033[K> %s\n", seg.Text)
+					fmt.Printf("\r\033[K")
+					if corrEngine != nil && finalText != transcribed {
+						fmt.Printf("📝 %s\n", transcribed)
+						fmt.Printf("✏️  %s\n", finalText)
+					} else {
+						fmt.Printf("> %s\n", finalText)
+					}
 				}
 
 				// Show partial result
-				partial, _ := engine.PartialResult()
+				partial, _ := transEngine.PartialResult()
 				if partial != "" {
-					fmt.Printf("\r... %s", partial)
+					fmt.Printf("\r💭 %s", partial)
 				}
 			case err := <-capture.Error():
 				fmt.Printf("Audio error: %v\n", err)
@@ -131,7 +187,7 @@ func runStart(args []string) {
 	}()
 
 	<-sigCh
-	fmt.Println("\nStopping...")
+	fmt.Println("\n\nStopping...")
 }
 
 func printUsage() {
@@ -143,7 +199,9 @@ func printUsage() {
 	fmt.Println("  help     Show this help message")
 	fmt.Println()
 	fmt.Println("Flags for start:")
-	fmt.Println("  --model  Path to Vosk model (default: models/vosk-model-small-pt-0.3)")
+	fmt.Println("  --model           Path to Vosk model (default: models/vosk-model-small-pt-0.3)")
+	fmt.Println("  --no-correction   Disable text correction with LLM")
+	fmt.Println("  --ollama-model    Ollama model for correction (default: gemma2:2b)")
 }
 
 // printVersion prints version information
