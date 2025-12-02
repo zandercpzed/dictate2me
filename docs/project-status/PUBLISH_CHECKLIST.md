@@ -27,9 +27,9 @@ rm -rf node_modules/
 cat .gitignore
 ```
 
-- [ ] Verificar se não há tokens/secrets no código
-- [ ] Remover arquivos temporários
-- [ ] Limpar histórico de Git se necessário
+- [x] Verificar se não há tokens/secrets no código
+- [x] Remover arquivos temporários
+- [x] Limpar histórico de Git se necessário
 
 ### 2. Verificar Branch Principal
 
@@ -41,8 +41,8 @@ git branch -m master main
 git branch --show-current
 ```
 
-- [ ] Branch principal é `main`
-- [ ] Branch está limpa e atualizada
+- [x] Branch principal é `main`
+- [x] Branch está limpa e atualizada
 
 ### 3. Tags e Releases
 
@@ -63,8 +63,8 @@ Features:
 git push origin v0.1.0
 ```
 
-- [ ] Tag v0.1.0 criada
-- [ ] Tag pushed para origin
+- [x] Tag v0.1.0 criada
+- [x] Tag pushed para origin
 
 ## 🔧 Configuração do GitHub
 
@@ -100,9 +100,8 @@ git push origin v0.1.0
 
 Verificar workflows em `.github/workflows/`:
 
-- [ ] `test.yaml` - Roda testes em cada push/PR
-- [ ] `lint.yaml` - Roda linters
-- [ ] `release.yaml` - Cria releases automaticamente em tags
+- [x] `ci.yaml` - Roda testes, build, lint e security em cada push/PR
+- [ ] `release.yaml` - Cria releases automaticamente em tags (próximo passo)
 
 **Testar:**
 
@@ -117,14 +116,14 @@ git push origin main
 
 Verificar em `.github/ISSUE_TEMPLATE/`:
 
-- [ ] `bug_report.md` - Template de bug
-- [ ] `feature_request.md` - Template de feature
-- [ ] `question.md` - Template de pergunta
-- [ ] `config.yml` - Configuração de templates
+- [x] `bug_report.md` - Template de bug
+- [x] `feature_request.md` - Template de feature
+- [x] `question.md` - Template de pergunta
+- [x] `config.yml` - Configuração de templates
 
 ### 4. Pull Request Template
 
-- [ ] `.github/pull_request_template.md` existe
+- [x] `.github/pull_request_template.md` existe
 
 ### 5. GitHub Discussions
 
