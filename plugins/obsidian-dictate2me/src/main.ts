@@ -11,6 +11,11 @@ export default class Dictate2MePlugin extends Plugin {
 	statusBarItem: HTMLElement;
 	ribbonIconEl: HTMLElement | null = null;
 	isRecording = false;
+	
+	// Auto-detected configuration
+	private readonly API_URL = 'http://localhost:8765/api/v1';
+	private readonly PROJECT_PATH = '/Users/zander/Library/CloudStorage/GoogleDrive-zander.cattapreta@zedicoes.com/My Drive/_ programação/_ dictate2me/dictate2me';
+	private readonly DAEMON_START_SCRIPT = '/Users/zander/Library/CloudStorage/GoogleDrive-zander.cattapreta@zedicoes.com/My Drive/_ programação/_ dictate2me/dictate2me/scripts/start-daemon.sh';
 
 	async onload() {
 		await this.loadSettings();
@@ -65,6 +70,59 @@ export default class Dictate2MePlugin extends Plugin {
 	}
 
 	/**
+	 * Get API token from file system
+	 */
+	private async getApiToken(): Promise<string> {
+		try {
+			// Try to read from standard location
+			const response = await fetch('file:///Users/zander/.dictate2me/api-token');
+			if (response.ok) {
+				const token = await response.text();
+				return token.trim();
+			}
+		} catch (error) {
+			console.error('Failed to read API token:', error);
+		}
+		return '';
+	}
+
+	/**
+	 * Start daemon automatically
+	 */
+	private async startDaemonAutomatically(): Promise<boolean> {
+		try {
+			new Notice('🚀 Starting dictate2me daemon...');
+			
+			// Open Terminal and run the start script
+			const command = `cd '${this.PROJECT_PATH}' && ./scripts/start-daemon.sh`;
+			
+			// Use AppleScript to execute in Terminal
+			const  script = `tell application "Terminal"\n  do script "${command.replace(/"/g, '\\"')}"\n  activate\nend tell`;
+			const encodedScript = encodeURIComponent(script);
+			
+			// Try to open using URL scheme (may not work in all contexts)
+			window.open(`data:text/plain;charset=utf-8,${encodedScript}`, '_blank');
+			
+			// Give daemon time to start
+			await new Promise(resolve => setTimeout(resolve, 5000));
+			
+			// Check if it started
+			const isRunning = await this.checkDaemonHealth();
+			if (isRunning) {
+				new Notice('✅ Daemon started successfully!');
+				return true;
+			} else {
+				new Notice('⚠️ Daemon may be starting... Please wait a moment and try again.');
+				return false;
+			}
+		} catch (error) {
+			console.error('Failed to start daemon:', error);
+			new Notice('❌ Couldn\'t start daemon automatically. Please start it manually in Terminal:\ncd ~/dictate2me && ./scripts/start-daemon.sh');
+			return false;
+		}
+	}
+
+	/**
 	 * Toggle dictation on/off
 	 */
 	async toggleDictation() {
@@ -78,12 +136,23 @@ export default class Dictate2MePlugin extends Plugin {
 	/**
 	 * Start dictation
 	 */
+	/**
+	 * Start dictation
+	 */
 	async startDictation() {
 		// Check if daemon is running
-		if (this.settings.autoCheckDaemon) {
-			const isRunning = await this.checkDaemonHealth();
+		let isRunning = await this.checkDaemonHealth();
+		
+		if (!isRunning) {
+			// Try to start automatically
+			const started = await this.startDaemonAutomatically();
+			if (!started) {
+				return;
+			}
+			// Re-check health
+			isRunning = await this.checkDaemonHealth();
 			if (!isRunning) {
-				new Notice('❌ Dictate2Me daemon is not running. Please start it first.');
+				new Notice('❌ Daemon started but not responding yet. Please try again in a few seconds.');
 				return;
 			}
 		}
@@ -100,9 +169,11 @@ export default class Dictate2MePlugin extends Plugin {
 		try {
 			// Create client if not exists
 			if (!this.client) {
+				const token = await this.getApiToken();
+				
 				this.client = new Dictate2MeClient(
-					this.settings.apiUrl,
-					this.settings.apiToken
+					this.API_URL,
+					token
 				);
 
 				// Setup event handlers
@@ -189,7 +260,7 @@ export default class Dictate2MePlugin extends Plugin {
 	 */
 	async checkDaemonHealth(): Promise<boolean> {
 		try {
-			const response = await fetch(`${this.settings.apiUrl}/health`);
+			const response = await fetch(`${this.API_URL}/health`);
 			if (response.ok) {
 				const data = await response.json();
 				return data.status === 'healthy';
@@ -238,47 +309,32 @@ class Dictate2MeSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', { text: 'Dictate2Me Settings' });
 
-		// API URL
-		new Setting(containerEl)
-			.setName('API URL')
-			.setDesc('URL of the Dictate2Me daemon API')
-			.addText((text) =>
-				text
-					.setPlaceholder('http://localhost:8765/api/v1')
-					.setValue(this.plugin.settings.apiUrl)
-					.onChange(async (value) => {
-						this.plugin.settings.apiUrl = value;
-						await this.plugin.saveSettings();
-					})
-			);
+		// Transcription section
+		containerEl.createEl('h3', { text: 'Transcription Settings' });
 
-		// API Token
-		new Setting(containerEl)
-			.setName('API Token')
-			.setDesc('Authentication token from ~/.dictate2me/api-token')
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your API token')
-					.setValue(this.plugin.settings.apiToken)
-					.onChange(async (value) => {
-						this.plugin.settings.apiToken = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		// Language
+		// Language dropdown
 		new Setting(containerEl)
 			.setName('Language')
-			.setDesc('Transcription language (e.g., pt, en, es)')
-			.addText((text) =>
-				text
-					.setPlaceholder('pt')
+			.setDesc('Transcription language')
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption('pt', '🇧🇷 Portuguese (pt)')
+					.addOption('en', '🇺🇸 English (en)')
+					.addOption('es', '🇪🇸 Spanish (es)')
+					.addOption('fr', '🇫🇷 French (fr)')
+					.addOption('de', '🇩🇪 German (de)')
+					.addOption('it', '🇮🇹 Italian (it)')
+					.addOption('ru', '🇷🇺 Russian (ru)')
+					.addOption('zh', '🇨🇳 Chinese (zh)')
 					.setValue(this.plugin.settings.language)
 					.onChange(async (value) => {
 						this.plugin.settings.language = value;
 						await this.plugin.saveSettings();
 					})
 			);
+
+		// Features section
+		containerEl.createEl('h3', { text: 'Features' });
 
 		// Enable correction
 		new Setting(containerEl)
@@ -329,35 +385,6 @@ class Dictate2MeSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.autoCheckDaemon = value;
 						await this.plugin.saveSettings();
-					})
-			);
-
-		// Test connection button
-		new Setting(containerEl)
-			.setName('Test connection')
-			.setDesc('Test connection to Dictate2Me daemon')
-			.addButton((button) =>
-				button
-					.setButtonText('Test')
-					.setCta()
-					.onClick(async () => {
-						button.setButtonText('Testing...');
-						button.setDisabled(true);
-
-						const isHealthy = await this.plugin.checkDaemonHealth();
-
-						if (isHealthy) {
-							new Notice('✅ Connection successful!');
-							button.setButtonText('Success ✓');
-						} else {
-							new Notice('❌ Connection failed. Is the daemon running?');
-							button.setButtonText('Failed ✗');
-						}
-
-						setTimeout(() => {
-							button.setButtonText('Test');
-							button.setDisabled(false);
-						}, 2000);
 					})
 			);
 	}
