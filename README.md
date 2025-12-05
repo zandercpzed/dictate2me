@@ -103,6 +103,41 @@ curl -X POST http://localhost:8765/api/v1/correct \
 
 Veja a [documentação completa da API](docs/API.md) para mais detalhes.
 
+## ⚠️ Modo Degradado (sem transcrição)
+
+Se o daemon for iniciado em um sistema sem a dependência nativa `libvosk` ou sem o modelo Vosk instalado, ele entrará em modo "degradado" — o servidor HTTP/WS continuará funcionando, mas a transcrição ficará desativada (retornos vazios). Isso é intencional para evitar que a aplicação falhe completamente em ambientes onde os binários nativos não estão disponíveis.
+
+Como resolver (macOS):
+
+- Instalar bibliotecas nativas (exemplo com Homebrew):
+
+```bash
+# Instalar dependências necessárias
+brew install portaudio
+# Baixar ou compilar libvosk (conforme instruções em docs/VOSK_INSTALLATION.md)
+```
+
+- Baixar modelo Vosk (recomendado: `vosk-model-small-pt-0.3`) e colocá-lo na pasta `models/` do projeto, ou passar `--model /caminho/para/modelo` ao iniciar o daemon:
+
+```bash
+./scripts/download-vosk-models.sh small
+dictate2me-daemon --model models/vosk-model-small-pt-0.3
+```
+
+O arquivo `vosk_api.h` e a biblioteca compartilhada (`libvosk.dylib` ou `libvosk.so`) precisam estar disponíveis para que a integração CGO funcione. Se houver problemas de `#include` ou `dylib not found`, verifique os paths de `CGO_CFLAGS` / `CGO_LDFLAGS` e `DYLD_LIBRARY_PATH`.
+
+Como instalar o Ollama (opcional, para correção de texto):
+
+```bash
+# Instale Ollama conforme https://ollama.com/docs
+# Exemplo (macOS):
+brew install ollama
+ollama pull gemma2:2b
+```
+
+Se o Ollama não estiver disponível, o daemon ainda iniciará em modo degradado para correção (mas continuará realizando transcrição se o Vosk estiver ok). Para iniciar explicitamente sem correção use `--no-correction`.
+
+
 ## 📚 Documentação
 
 | Documento                               | Descrição                  |

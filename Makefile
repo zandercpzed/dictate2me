@@ -28,8 +28,8 @@ build:
 	@# Create symlink to avoid spaces in path for CGO
 	@rm -f $(VOSK_TEMP_PATH)
 	@ln -s "$(VOSK_LIB_PATH)" $(VOSK_TEMP_PATH)
-	@CGO_CFLAGS="-I$(VOSK_TEMP_PATH)" CGO_LDFLAGS="-L$(VOSK_TEMP_PATH) -lvosk" go build -o "$(GOBIN)/$(BINARY_NAME)" ./cmd/$(BINARY_NAME)
-	@CGO_CFLAGS="-I$(VOSK_TEMP_PATH)" CGO_LDFLAGS="-L$(VOSK_TEMP_PATH) -lvosk" go build -o "$(GOBIN)/$(BINARY_DAEMON)" ./cmd/$(BINARY_DAEMON)
+	@CGO_CFLAGS="-I$(VOSK_TEMP_PATH)" CGO_LDFLAGS="-L$(VOSK_TEMP_PATH)" go build -o "$(GOBIN)/$(BINARY_NAME)" ./cmd/$(BINARY_NAME)
+	@CGO_CFLAGS="-I$(VOSK_TEMP_PATH)" CGO_LDFLAGS="-L$(VOSK_TEMP_PATH)" go build -o "$(GOBIN)/$(BINARY_DAEMON)" ./cmd/$(BINARY_DAEMON)
 	@echo "${GREEN}✓ Build complete${NC}"
 
 VOSK_LIB_PATH=$(shell pwd)/lib/vosk
@@ -41,7 +41,7 @@ test:
 	@# Create symlink to avoid spaces in path for CGO
 	@rm -f $(VOSK_TEMP_PATH)
 	@ln -s "$(VOSK_LIB_PATH)" $(VOSK_TEMP_PATH)
-	@CGO_CFLAGS="-I$(VOSK_TEMP_PATH)" CGO_LDFLAGS="-L$(VOSK_TEMP_PATH) -lvosk" DYLD_LIBRARY_PATH="$(VOSK_TEMP_PATH)" go test -v -race -coverprofile=coverage.out ./...
+	@CGO_CFLAGS="-I$(VOSK_TEMP_PATH)" CGO_LDFLAGS="-L$(VOSK_TEMP_PATH)" DYLD_LIBRARY_PATH="$(VOSK_TEMP_PATH)" go test -v -race -coverprofile=coverage.out ./...
 	@echo "${GREEN}✓ Tests passed${NC}"
 
 ## test-coverage: Run tests with coverage report

@@ -209,6 +209,28 @@ curl http://localhost:8765/api/v1/health
 
 3. Check daemon logs for errors
 
+### Degraded mode (daemon iniciou, mas sem transcrição)
+
+Se o daemon iniciar mas o plugin mostrar que a transcrição está desativada, é provável que o Vosk (biblioteca nativa e/ou modelo) não esteja disponível no sistema. O daemon foi projetado para subir em modo degradado para não quebrar a integração — porém, a captura/streaming continuará sem gerar transcrições.
+
+Soluções rápidas:
+
+- Instale bibliotecas nativas e modelos (macOS):
+
+```bash
+brew install portaudio
+./scripts/download-vosk-models.sh small
+dictate2me-daemon --model models/vosk-model-small-pt-0.3
+```
+
+- Se quiser desativar correção (quando Ollama não está disponível):
+
+```bash
+dictate2me-daemon --no-correction
+```
+
+Verifique os logs do daemon no terminal para mensagens como `Falling back to degraded (no-op) transcription engine` ou erros relacionados a `vosk_api.h` / `libvosk.dylib`.
+
 ## Development
 
 ### Building from Source

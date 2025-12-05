@@ -38,12 +38,27 @@ func (s *Server) authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // corsMiddleware adds CORS headers
 func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow localhost origins only
+		// Allow localhost and Obsidian app origins
 		origin := r.Header.Get("Origin")
-		if origin != "" && strings.HasPrefix(origin, "http://localhost") {
+		allowedOrigins := []string{
+			"http://localhost",
+			"app://obsidian.md",
+			"capacitor://localhost",
+		}
+		
+		allowed := false
+		for _, prefix := range allowedOrigins {
+			if origin != "" && strings.HasPrefix(origin, prefix) {
+				allowed = true
+				break
+			}
+		}
+		
+		if allowed {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Max-Age", "3600")
 		}
 

@@ -23,7 +23,7 @@ type Config struct {
 	Token string // API token for authentication
 
 	// TranscriptionEngine is required
-	TranscriptionEngine *transcription.Engine
+	TranscriptionEngine transcription.Transcriber
 
 	// CorrectionEngine is optional
 	CorrectionEngine *correction.Engine
@@ -112,9 +112,17 @@ func New(cfg Config) (*Server, error) {
 
 // Start starts the HTTP server
 func (s *Server) Start() error {
+	// Safely show token prefix
+	tokenPreview := ""
+	if len(s.config.Token) >= 8 {
+		tokenPreview = s.config.Token[:8] + "..."
+	} else {
+		tokenPreview = s.config.Token
+	}
+
 	s.logger.Info("starting API server",
 		"addr", s.server.Addr,
-		"token", s.config.Token[:8]+"...",
+		"token", tokenPreview,
 	)
 
 	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

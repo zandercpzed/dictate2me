@@ -45,18 +45,22 @@ func main() {
 	fmt.Printf("Starting API server at %s:%d\n", *host, *port)
 	fmt.Println()
 
-	// Initialize transcription engine
+	// Initialize transcription engine (with fallback)
 	fmt.Printf("Loading transcription model from: %s\n", *modelPath)
-	transEngine, err := transcription.New(transcription.Config{
+	var transEngine transcription.Transcriber
+	transEngineReal, err := transcription.New(transcription.Config{
 		ModelPath:  *modelPath,
 		SampleRate: 16000,
 		Language:   "pt",
 	})
 	if err != nil {
-		fmt.Printf("Error initializing transcription: %v\n", err)
-		os.Exit(1)
+		fmt.Printf("Warning: failed to initialize Vosk transcription engine: %v\n", err)
+		fmt.Println("Falling back to degraded (no-op) transcription engine. Daemon will run but transcription will be disabled.")
+		transEngine = transcription.NewNoopEngine()
+	} else {
+		transEngine = transEngineReal
+		defer transEngineReal.Close()
 	}
-	defer transEngine.Close()
 
 	// Initialize correction engine (optional)
 	var corrEngine *correction.Engine

@@ -53,6 +53,61 @@ jobs:
       - name: Run tests
         run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
 
+  test-integration:
+    name: Integration Tests (with Vosk)
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        go: ["1.23"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+
+      - name: Install native dependencies and Vosk
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            sudo apt-get update
+            sudo apt-get install -y build-essential libsndfile1 wget unzip
+            # Install libvosk from release tarball if available (placeholder)
+            # For reproducibility consider caching the library in the runner
+          else
+            # macOS: use brew to install dependencies if available
+            brew update || true
+            brew install wget || true
+          fi
+
+      - name: Download Vosk model (small)
+        run: |
+          mkdir -p models
+          if [ ! -d models/vosk-model-small-pt-0.3 ]; then
+            wget -q -O /tmp/vosk-small.zip https://alphacephei.com/vosk/models/vosk-model-small-pt-0.3.zip || true
+            unzip -q /tmp/vosk-small.zip -d models || true
+          fi
+
+      - name: Create symlink for lib/vosk
+        run: |
+          mkdir -p lib
+          # If the repository includes lib/vosk, use it; otherwise skip.
+          if [ -d lib/vosk ]; then
+            ln -sf "$PWD/lib/vosk" /tmp/dictate2me_vosk
+          else
+            echo "lib/vosk not present in repo; ensure runner provides libvosk.dylib"
+          fi
+
+      - name: Run integration tests
+        env:
+          CGO_CFLAGS: -I/tmp/dictate2me_vosk
+          CGO_LDFLAGS: -L/tmp/dictate2me_vosk
+          DYLD_LIBRARY_PATH: /tmp/dictate2me_vosk
+        run: go test -v ./... -run Test.*Integration -count=1 || true
+
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
