@@ -2,7 +2,7 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 import { Dictate2MeClient } from './client';
 import { Dictate2MeSettings, DEFAULT_SETTINGS } from './settings';
 import { spawn } from 'child_process';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 /**
  * Main plugin class for Dictate2Me
@@ -95,15 +95,32 @@ export default class Dictate2MePlugin extends Plugin {
 		try {
 			console.log('Attempting to auto-start daemon...');
 			
+			// Save Groq API key to .env file for daemon
+			if (this.settings.groqApiKey) {
+				const homeDir = process.env.HOME || process.env.USERPROFILE;
+				const envPath = `${homeDir}/.dictate2me/.env`;
+				const envContent = `GROQ_API_KEY="${this.settings.groqApiKey}"\n`;
+				try {
+					writeFileSync(envPath, envContent, { encoding: 'utf8' });
+					console.log('✓ Saved Groq API key to ~/.dictate2me/.env');
+				} catch (err) {
+					console.error('Failed to save Groq API key:', err);
+				}
+			}
+			
 			// Copy command to clipboard as a backup
 			const projectRoot = this.DAEMON_START_SCRIPT.replace('/scripts/start-daemon.sh', '');
 			const command = `cd '${projectRoot}' && ./scripts/start-daemon.sh`;
 			await navigator.clipboard.writeText(command);
 
-			// Attempt to spawn the process
+			// Attempt to spawn the process with Groq API key in environment
 			const subprocess = spawn(this.DAEMON_START_SCRIPT, [], {
 				detached: true,
-				stdio: 'ignore'
+				stdio: 'ignore',
+				env: {
+					...process.env,
+					GROQ_API_KEY: this.settings.groqApiKey || process.env.GROQ_API_KEY || ''
+				}
 			});
 
 			subprocess.unref();
@@ -659,6 +676,23 @@ class Dictate2MeSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.autoCheckDaemon)
 					.onChange(async (value) => {
 						this.plugin.settings.autoCheckDaemon = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		// API Configuration section
+		containerEl.createEl('h3', { text: 'API Configuration' });
+
+		// Groq API Key
+		new Setting(containerEl)
+			.setName('Groq API Key')
+			.setDesc('Your Groq API key for transcription (get one at https://console.groq.com/keys)')
+			.addText((text) =>
+				text
+					.setPlaceholder('gsk_...')
+					.setValue(this.plugin.settings.groqApiKey)
+					.onChange(async (value) => {
+						this.plugin.settings.groqApiKey = value;
 						await this.plugin.saveSettings();
 					})
 			);

@@ -57,9 +57,35 @@ else
 fi
 # --------------------
 
+# Load Groq API Key from .env if exists
+ENV_FILE="$HOME/.dictate2me/.env"
+if [ -f "$ENV_FILE" ]; then
+    source "$ENV_FILE"
+    echo "✓ Loaded API key from ~/.dictate2me/.env"
+fi
+
+# Check for Groq API Key
+if [ -z "$GROQ_API_KEY" ]; then
+    echo ""
+    echo "❌ GROQ_API_KEY not configured!"
+    echo ""
+    echo "To fix (choose one):"
+    echo "  Option 1 (Obsidian Plugin):"
+    echo "    Go to Settings > Dictate2Me > API Configuration"
+    echo "    Enter your Groq API key there"
+    echo ""
+    echo "  Option 2 (Manual):"
+    echo "    1. Get API key at: https://console.groq.com/keys"
+    echo "    2. Add to your ~/.zshrc:"
+    echo "       export GROQ_API_KEY='your-key-here'"
+    echo "    3. Run: source ~/.zshrc"
+    echo ""
+    exit 1
+fi
+
 # Start daemon
 cd "$PROJECT_ROOT"
 echo "🎤 Starting daemon..."
-./bin/dictate2me-daemon > /tmp/dictate2me-daemon.log 2>&1
+exec ./bin/dictate2me-daemon > /tmp/dictate2me-daemon.log 2>&1
 
 # Note: This script will block until daemon is stopped (Ctrl+C)

@@ -7,6 +7,7 @@ export interface Dictate2MeSettings {
 	showPartialResults: boolean;
 	showConfidence: boolean;
 	autoCheckDaemon: boolean;
+	groqApiKey: string; // Groq API Key for transcription
 }
 
 /**
@@ -18,4 +19,5 @@ export const DEFAULT_SETTINGS: Dictate2MeSettings = {
 	showPartialResults: true,
 	showConfidence: true,
 	autoCheckDaemon: true,
+	groqApiKey: '', // User must configure
 };
