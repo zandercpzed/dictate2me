@@ -141,8 +141,8 @@ func (s *Server) handleTranscribe(w http.ResponseWriter, r *http.Request) {
 		avgConf += seg.Conf
 		respSegments = append(respSegments, Segment{
 			Text:       seg.Text,
-			Start:      seg.Start.Seconds(),
-			End:        seg.End.Seconds(),
+			Start:      0, // Groq doesn't provide timestamps
+			End:        0,
 			Confidence: seg.Conf,
 		})
 	}

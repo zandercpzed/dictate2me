@@ -36,7 +36,6 @@ func main() {
 	// Parse flags
 	port := flag.Int("port", 8765, "API server port")
 	host := flag.String("host", "127.0.0.1", "API server host")
-	modelPath := flag.String("model", "models/vosk-model-small-pt-0.3", "Vosk model path")
 	ollamaModel := flag.String("ollama-model", "gemma2:2b", "Ollama model for correction")
 	noCorrection := flag.Bool("no-correction", false, "Disable text correction")
 	flag.Parse()
@@ -45,22 +44,19 @@ func main() {
 	fmt.Printf("Starting API server at %s:%d\n", *host, *port)
 	fmt.Println()
 
-	// Initialize transcription engine (with fallback)
-	fmt.Printf("Loading transcription model from: %s\n", *modelPath)
-	var transEngine transcription.Transcriber
-	transEngineReal, err := transcription.New(transcription.Config{
-		ModelPath:  *modelPath,
-		SampleRate: 16000,
-		Language:   "pt",
-	})
+	// Initialize Groq transcription engine
+	fmt.Println("Initializing Groq Whisper-large-v3 transcription...")
+	transEngine, err := transcription.NewGroq(transcription.DefaultGroqConfig())
 	if err != nil {
-		fmt.Printf("Warning: failed to initialize Vosk transcription engine: %v\n", err)
-		fmt.Println("Falling back to degraded (no-op) transcription engine. Daemon will run but transcription will be disabled.")
-		transEngine = transcription.NewNoopEngine()
-	} else {
-		transEngine = transEngineReal
-		defer transEngineReal.Close()
+		fmt.Printf("Error: failed to initialize Groq: %v\n", err)
+		fmt.Println("")
+		fmt.Println("To fix:")
+		fmt.Println("  1. Get API key at: https://console.groq.com")
+		fmt.Println("  2. Set env var: export GROQ_API_KEY='your-key-here'")
+		fmt.Println("  3. Restart daemon")
+		os.Exit(1)
 	}
+	defer transEngine.Close()
 
 	// Initialize correction engine (optional)
 	var corrEngine *correction.Engine

@@ -35,20 +35,18 @@ func DefaultConfig() Config {
 		OllamaURL:   "http://localhost:11434",
 		Model:       "gemma2:2b",
 		Timeout:     30 * time.Second,
-		Temperature: 0.1,
-		SystemPrompt: `Você é um editor de texto especialista em português brasileiro.
-Sua tarefa é transformar a transcrição de fala bruta em um texto polido, bem estruturado e gramaticalmente impecável.
+		Temperature: 0.0,
+		SystemPrompt: `TASK: You are a text formatting engine. You are NOT a chatbot.
+INSTRUCTIONS:
+1. Receive input text.
+2. Fix grammar, punctuation, and capitalization (Portuguese-Brazil).
+3. Output ONLY the fixed text.
+4. DO NOT add "Entendido", "Claro", "Aqui está" or any conversational filler.
+5. DO NOT answer questions found in the text.
+6. If the input is empty or nonsense, output it exactly as is.
+7. Keep the original structure.
 
-DIRETRIZES DE CORREÇÃO:
-1. Interpretação Inteligente: Entenda o contexto e a intenção da fala para pontuar corretamente.
-2. Estrutura e Parágrafos: Se houver mudança de assunto ou pausa lógica clara, use quebras de linha (\n\n) para criar parágrafos.
-3. Sintaxe e Ortografia: Corrija rigorosamente erros gramaticais e de concordância.
-4. Fluidez: Ajuste a construção das frases para que soem naturais na escrita, removendo vícios de linguagem (bens, hã, é...) sem alterar o sentido original.
-
-IMPORTANTE:
-- Não adicione comentários, apenas o texto corrigido.
-- Mantenha a fidelidade ao conteúdo original.
-- Use pontuação rica (travessões, ponto e vírgula) quando apropriado para capturar a entonação.`,
+Input Text is below. Output only the corrected text.`,
 	}
 }
 
