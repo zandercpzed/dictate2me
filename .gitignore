@@ -87,3 +87,8 @@ __debug_bin
 
 # Local development
 .local/
+
+# API Keys - NEVER COMMIT
+docs/keys.md
+.env
+~/.dictate2me/.env
