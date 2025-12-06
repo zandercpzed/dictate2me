@@ -298,16 +298,27 @@ export default class Dictate2MePlugin extends Plugin {
 					const confidencePercent = Math.round(data.confidence * 100);
 					this.updateStatusBar(`✓ Inserted (${confidencePercent}%)`);
 				} else {
-					this.updateStatusBar('✓ Inserted');
 				}
 			}
 		});
 
-		this.client.on('error', (error: string) => {
-			new Notice(`❌ Error: ${error}`);
-			this.updateStatusBar('Error');
+		this.client.on('error', async (error: string) => {
+			// Stop dictation immediately on error
 			this.isRecording = false;
 			this.updateRibbonIcon();
+			this.updateStatusBar('Error - Stopped');
+			
+			// Disconnect to stop error loop
+			if (this.client) {
+				try {
+					await this.client.disconnect();
+				} catch (e) {
+					console.error('Error disconnecting:', e);
+				}
+			}
+			
+			// Show error notice (only once since we disconnected)
+			new Notice(`❌ Dictation Error:\n${error}`, 10000);
 		});
 	}
 

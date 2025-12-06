@@ -2,10 +2,10 @@ package transcription
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"time"
@@ -109,29 +109,42 @@ func (g *GroqEngine) transcribeInt16(samples []int16) (string, error) {
 		return "", fmt.Errorf("failed to convert to WAV: %w", err)
 	}
 
-	// Encode to base64 for JSON transport (alternative: multipart/form-data)
-	encodedAudio := base64.StdEncoding.EncodeToString(wavBytes)
+	// Create multipart form data
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
 
-	// Prepare request
-	reqBody := map[string]interface{}{
-		"model":    g.config.Model,
-		"file":     encodedAudio,
-		"language": g.config.Language,
+	// Add file field
+	part, err := writer.CreateFormFile("file", "audio.wav")
+	if err != nil {
+		return "", fmt.Errorf("failed to create form file: %w", err)
+	}
+	if _, err := part.Write(wavBytes); err != nil {
+		return "", fmt.Errorf("failed to write audio data: %w", err)
 	}
 
-	reqJSON, err := json.Marshal(reqBody)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+	// Add model field
+	if err := writer.WriteField("model", g.config.Model); err != nil {
+		return "", fmt.Errorf("failed to write model field: %w", err)
+	}
+
+	// Add language field
+	if err := writer.WriteField("language", g.config.Language); err != nil {
+		return "", fmt.Errorf("failed to write language field: %w", err)
+	}
+
+	// Close multipart writer
+	if err := writer.Close(); err != nil {
+		return "", fmt.Errorf("failed to close multipart writer: %w", err)
 	}
 
 	// Create HTTP request
-	req, err := http.NewRequest("POST", "https://api.groq.com/openai/v1/audio/transcriptions", bytes.NewReader(reqJSON))
+	req, err := http.NewRequest("POST", "https://api.groq.com/openai/v1/audio/transcriptions", body)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+g.config.APIKey)
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	// Send request
 	resp, err := g.httpClient.Do(req)
