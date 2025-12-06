@@ -23,6 +23,9 @@ export class Dictate2MeClient {
 	private audioContext: AudioContext | null = null;
 	private scriptProcessor: ScriptProcessorNode | null = null;
 	private eventHandlers: Map<string, EventHandler[]> = new Map();
+	private lastErrorTime = 0;
+	private lastErrorMessage = '';
+	private static readonly ERROR_THROTTLE_MS = 3000; // Only show same error once every 3 seconds
 
 	constructor(apiUrl: string, token: string) {
 		this.apiUrl = apiUrl;
@@ -40,9 +43,24 @@ export class Dictate2MeClient {
 	}
 
 	/**
-	 * Emit event to handlers
+	 * Emit event to handlers (with throttling for errors)
 	 */
 	private emit(event: string, data: any) {
+		// Throttle error events to prevent spam
+		if (event === 'error') {
+			const now = Date.now();
+			const message = typeof data === 'string' ? data : JSON.stringify(data);
+			
+			// Skip if same error was shown recently
+			if (message === this.lastErrorMessage && (now - this.lastErrorTime) < Dictate2MeClient.ERROR_THROTTLE_MS) {
+				console.log('(Error throttled, same as previous)');
+				return;
+			}
+			
+			this.lastErrorTime = now;
+			this.lastErrorMessage = message;
+		}
+
 		const handlers = this.eventHandlers.get(event);
 		if (handlers) {
 			handlers.forEach((handler) => handler(data));

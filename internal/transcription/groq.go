@@ -142,7 +142,13 @@ func (g *GroqEngine) transcribeInt16(samples []int16) (string, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("groq API returned status %d: %s", resp.StatusCode, string(body))
+
+		// Handle 401 specifically - invalid API key
+		if resp.StatusCode == http.StatusUnauthorized {
+			return "", fmt.Errorf("⚠️  INVALID GROQ API KEY. Please configure a valid API key in Obsidian Settings > Dictate2Me > API Configuration. Get one free at: https://console.groq.com/keys")
+		}
+
+		return "", fmt.Errorf("groq API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
