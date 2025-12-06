@@ -60,6 +60,6 @@ fi
 # Start daemon
 cd "$PROJECT_ROOT"
 echo "🎤 Starting daemon..."
-./bin/dictate2me-daemon
+./bin/dictate2me-daemon > /tmp/dictate2me-daemon.log 2>&1
 
 # Note: This script will block until daemon is stopped (Ctrl+C)

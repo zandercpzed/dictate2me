@@ -1,6 +1,8 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { Dictate2MeClient } from './client';
 import { Dictate2MeSettings, DEFAULT_SETTINGS } from './settings';
+import { spawn } from 'child_process';
+import { readFileSync } from 'fs';
 
 /**
  * Main plugin class for Dictate2Me
@@ -69,43 +71,52 @@ export default class Dictate2MePlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+
 	/**
 	 * Get API token from file system
 	 */
 	private async getApiToken(): Promise<string> {
 		try {
-			// Try to read from standard location
-			const response = await fetch('file:///Users/zander/.dictate2me/api-token');
-			if (response.ok) {
-				const token = await response.text();
-				return token.trim();
-			}
+			const homeDir = process.env.HOME || process.env.USERPROFILE;
+			const tokenPath = `${homeDir}/.dictate2me/api-token`;
+			const token = readFileSync(tokenPath, 'utf8');
+			return token.trim();
 		} catch (error) {
 			console.error('Failed to read API token:', error);
+			new Notice('Failed to read API token: ' + error.message);
 		}
 		return '';
 	}
 
 	/**
-	 * Start daemon automatically
-	 * Note: Obsidian plugins cannot execute shell scripts directly.
-	 * This function copies the startup command to clipboard and returns false
-	 * so the UI can show manual instructions.
+	 * Start daemon automatically using child_process
 	 */
 	private async startDaemonAutomatically(): Promise<boolean> {
 		try {
-			// Build the complete command to start the daemon
+			console.log('Attempting to auto-start daemon...');
+			
+			// Copy command to clipboard as a backup
 			const projectRoot = this.DAEMON_START_SCRIPT.replace('/scripts/start-daemon.sh', '');
 			const command = `cd '${projectRoot}' && ./scripts/start-daemon.sh`;
-			
-			// Copy command to clipboard for user convenience
 			await navigator.clipboard.writeText(command);
+
+			// Attempt to spawn the process
+			const subprocess = spawn(this.DAEMON_START_SCRIPT, [], {
+				detached: true,
+				stdio: 'ignore'
+			});
+
+			subprocess.unref();
 			
-			// We cannot execute shell commands from Obsidian's sandbox
-			// Return false to trigger manual instructions in the UI
-			return false;
+			// Wait a bit to see if it starts
+			await new Promise(resolve => setTimeout(resolve, 3000));
+			
+			// Check health
+			const isHealthy = await this.checkDaemonHealth();
+			return isHealthy;
+
 		} catch (error) {
-			console.error('Failed to prepare daemon startup:', error);
+			console.error('Failed to auto-start daemon:', error);
 			return false;
 		}
 	}
@@ -135,11 +146,17 @@ export default class Dictate2MePlugin extends Plugin {
 			let isHealthy = await this.checkDaemonHealth();
 
 			if (!isHealthy) {
-				// Daemon is not running - show instructions immediately
-				modal.updateStep('daemon', 'error');
-				modal.setMessage('Daemon not running. Please start it manually.');
-				modal.showManualInstructions(this.DAEMON_START_SCRIPT);
-				return; // Keep modal open to show instructions
+				// Try auto-start
+				modal.setMessage('Daemon not running. Attempting auto-start...');
+				isHealthy = await this.startDaemonAutomatically();
+				
+				if (!isHealthy) {
+					// Daemon is not running and auto-start failed - show manual instructions
+					modal.updateStep('daemon', 'error');
+					modal.setMessage('Failed to start daemon automatically.');
+					modal.showManualInstructions(this.DAEMON_START_SCRIPT);
+					return; // Keep modal open to show instructions
+				}
 			}
 
 			// STEP 1: Check Transcriber Engine (highest priority)
@@ -214,7 +231,8 @@ export default class Dictate2MePlugin extends Plugin {
 
 		} catch (error) {
 			console.error(error);
-			modal.setMessage('Error: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+			modal.setMessage('Error: ' + errorMessage);
 			modal.updateStep('audio', 'error');
 		}
 	}

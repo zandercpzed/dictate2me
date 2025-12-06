@@ -36,15 +36,19 @@ func DefaultConfig() Config {
 		Model:       "gemma2:2b",
 		Timeout:     30 * time.Second,
 		Temperature: 0.1,
-		SystemPrompt: `Você é um corretor de texto em português brasileiro.
-Sua tarefa é corrigir o texto fornecido adicionando:
-- Pontuação adequada (vírgulas, pontos, etc)
-- Capitalização correta (início de frases, nomes próprios)
-- Correções gramaticais mínimas necessárias
-- Formatação de parágrafos quando apropriado
+		SystemPrompt: `Você é um editor de texto especialista em português brasileiro.
+Sua tarefa é transformar a transcrição de fala bruta em um texto polido, bem estruturado e gramaticalmente impecável.
 
-IMPORTANTE: Mantenha o conteúdo e significado original. Não reescreva ou mude o sentido, apenas corrija.
-Retorne APENAS o texto corrigido, sem explicações ou comentários adicionais.`,
+DIRETRIZES DE CORREÇÃO:
+1. Interpretação Inteligente: Entenda o contexto e a intenção da fala para pontuar corretamente.
+2. Estrutura e Parágrafos: Se houver mudança de assunto ou pausa lógica clara, use quebras de linha (\n\n) para criar parágrafos.
+3. Sintaxe e Ortografia: Corrija rigorosamente erros gramaticais e de concordância.
+4. Fluidez: Ajuste a construção das frases para que soem naturais na escrita, removendo vícios de linguagem (bens, hã, é...) sem alterar o sentido original.
+
+IMPORTANTE:
+- Não adicione comentários, apenas o texto corrigido.
+- Mantenha a fidelidade ao conteúdo original.
+- Use pontuação rica (travessões, ponto e vírgula) quando apropriado para capturar a entonação.`,
 	}
 }
 

@@ -54,7 +54,8 @@ export class Dictate2MeClient {
 	 */
 	async connect(config: StreamConfig): Promise<void> {
 		// Create WebSocket connection
-		const wsUrl = this.apiUrl.replace('http://', 'ws://').replace('/api/v1', '/api/v1/stream');
+		let wsUrl = this.apiUrl.replace('http://', 'ws://').replace('/api/v1', '/api/v1/stream');
+		wsUrl += `?token=${this.token}`;
 		
 		this.ws = new WebSocket(wsUrl);
 
@@ -92,9 +93,10 @@ export class Dictate2MeClient {
 			};
 
 			this.ws.onerror = (error) => {
-				console.error('WebSocket error:', error);
-				this.emit('error', 'Connection error');
-				reject(error);
+				console.error('WebSocket connection failed to:', wsUrl);
+				console.error('WebSocket error event:', error);
+				this.emit('error', `Connection failed to ${wsUrl}. Check console for details.`);
+				reject(new Error(`WebSocket connection failed to ${wsUrl}`));
 			};
 
 			this.ws.onclose = () => {

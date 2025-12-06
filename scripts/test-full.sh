@@ -100,7 +100,6 @@ if curl -s "$API_URL/health" > /dev/null 2>&1; then
 else
     # Start daemon in background
     DYLD_LIBRARY_PATH=/tmp/dictate2me_vosk ./bin/dictate2me-daemon \
-        --no-correction \
         > /tmp/dictate2me-test.log 2>&1 &
     DAEMON_PID=$!
     

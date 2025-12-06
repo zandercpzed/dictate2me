@@ -1,8 +1,10 @@
 package api
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -12,20 +14,46 @@ import (
 // authMiddleware validates the API token
 func (s *Server) authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var token string
+
+		// 1. Check Authorization header
 		auth := r.Header.Get("Authorization")
-		if auth == "" {
-			s.respondError(w, http.StatusUnauthorized, "missing Authorization header")
+		if auth != "" {
+			parts := strings.SplitN(auth, " ", 2)
+			if len(parts) == 2 && parts[0] == "Bearer" {
+				token = parts[1]
+			}
+		}
+
+		// 2. Check Query parameter (for WebSockets)
+		if token == "" {
+			token = r.URL.Query().Get("token")
+		}
+
+		// LOGGING FOR DEBUGGING
+		s.logger.Info("auth attempt",
+			"path", r.URL.Path,
+			"client_ip", r.RemoteAddr,
+			"has_auth_header", auth != "",
+			"token_source", func() string {
+				if auth != "" {
+					return "header"
+				}
+				if r.URL.Query().Get("token") != "" {
+					return "query"
+				}
+				return "none"
+			}(),
+			"received_token_len", len(token),
+			"expected_token_len", len(s.config.Token),
+			"match", token == s.config.Token,
+		)
+
+		if token == "" {
+			s.respondError(w, http.StatusUnauthorized, "missing Authorization header or token query param")
 			return
 		}
 
-		// Expected format: "Bearer <token>"
-		parts := strings.SplitN(auth, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			s.respondError(w, http.StatusUnauthorized, "invalid Authorization format")
-			return
-		}
-
-		token := parts[1]
 		if token != s.config.Token {
 			s.respondError(w, http.StatusUnauthorized, "invalid token")
 			return
@@ -45,7 +73,7 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 			"app://obsidian.md",
 			"capacitor://localhost",
 		}
-		
+
 		allowed := false
 		for _, prefix := range allowedOrigins {
 			if origin != "" && strings.HasPrefix(origin, prefix) {
@@ -53,7 +81,7 @@ func (s *Server) corsMiddleware(next http.Handler) http.Handler {
 				break
 			}
 		}
-		
+
 		if allowed {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -164,6 +192,14 @@ type responseWriter struct {
 func (w *responseWriter) WriteHeader(code int) {
 	w.statusCode = code
 	w.ResponseWriter.WriteHeader(code)
+}
+
+// Hijack implements http.Hijacker to allow WebSockets to work
+func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if h, ok := w.ResponseWriter.(http.Hijacker); ok {
+		return h.Hijack()
+	}
+	return nil, nil, fmt.Errorf("underlying ResponseWriter does not support Hijacker")
 }
 
 // Helper functions for responses

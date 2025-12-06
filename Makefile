@@ -125,4 +125,9 @@ models:
 	@./scripts/download-models.sh
 	@echo "${GREEN}✓ Models downloaded${NC}"
 
+## install-plugin: Helper to install Obsidian plugin
+install-plugin:
+	@echo "${CYAN}Running plugin installer...${NC}"
+	@go run ./cmd/plugin-installer/main.go
+
 .DEFAULT_GOAL := help
