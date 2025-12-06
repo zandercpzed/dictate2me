@@ -65,6 +65,7 @@ func (s *Server) handleStream(w http.ResponseWriter, r *http.Request) {
 	// Stream state
 	var config StreamStartConfig
 	started := false
+	var audioBuffer []int16 // Buffer to accumulate audio samples
 
 	// Set read deadline
 	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
@@ -123,12 +124,24 @@ func (s *Server) handleStream(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			// Transcribe
-			segments, err := s.config.TranscriptionEngine.TranscribeStream(samples)
+			// Buffer audio (accumulate ~1 second = 16000 samples at 16kHz)
+			audioBuffer = append(audioBuffer, samples...)
+
+			// Only transcribe when we have enough audio (1+ seconds)
+			const minSamples = 16000 // 1 second at 16kHz
+			if len(audioBuffer) < minSamples {
+				continue
+			}
+
+			// Transcribe accumulated buffer
+			segments, err := s.config.TranscriptionEngine.TranscribeStream(audioBuffer)
 			if err != nil {
 				s.sendError(conn, fmt.Sprintf("transcription error: %v", err))
 				continue
 			}
+
+			// Clear buffer after successful transcription
+			audioBuffer = audioBuffer[:0]
 
 			// Send final results
 			for _, seg := range segments {

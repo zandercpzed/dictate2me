@@ -103,11 +103,22 @@ func (g *GroqEngine) Close() error {
 
 // transcribeInt16 sends int16 samples to Groq for transcription
 func (g *GroqEngine) transcribeInt16(samples []int16) (string, error) {
+	// Log for debugging
+	fmt.Printf("[DEBUG] Transcribing %d samples (%d bytes)\n", len(samples), len(samples)*2)
+
+	// Skip if audio is too short (less than 0.1 second at 16kHz)
+	if len(samples) < 1600 {
+		fmt.Printf("[DEBUG] Audio too short, skipping (%d samples)\n", len(samples))
+		return "", nil
+	}
+
 	// Convert int16 to WAV bytes
 	wavBytes, err := int16ToWAV(samples, 16000)
 	if err != nil {
 		return "", fmt.Errorf("failed to convert to WAV: %w", err)
 	}
+
+	fmt.Printf("[DEBUG] WAV file size: %d bytes\n", len(wavBytes))
 
 	// Create multipart form data
 	body := &bytes.Buffer{}
