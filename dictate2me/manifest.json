@@ -1,0 +1,9 @@
+{
+  "id": "obsidian-dictate2me",
+  "name": "Dictate2Me",
+  "version": "0.1.0",
+  "author": "zandercpzed",
+  "description": "Plugin Obsidian para transcrição de voz 100% local.",
+  "main": "dist/main.js",
+  "minAppVersion": "0.15.0"
+}

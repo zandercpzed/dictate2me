@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/prompt.md",
+                "file": "dictate2me/node_modules/@esbuild/darwin-arm64/README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "prompt"
+              "title": "README"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 480.5
   },
   "right": {
     "id": "f791ba30dc1bc737",
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "docs/prompt.md",
+                "file": "dictate2me/node_modules/@esbuild/darwin-arm64/README.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for prompt"
+              "title": "Backlinks for README"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "docs/prompt.md",
+                "file": "dictate2me/node_modules/@esbuild/darwin-arm64/README.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from prompt"
+              "title": "Outgoing links from README"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "docs/prompt.md",
+                "file": "dictate2me/node_modules/@esbuild/darwin-arm64/README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of prompt"
+              "title": "Outline of README"
             }
           }
         ]
@@ -183,9 +183,32 @@
       "bases:Create new base": false
     }
   },
-  "active": "ff8f1dbecb5ed003",
+  "active": "bbbf293c7a0867ef",
   "lastOpenFiles": [
-    "docs/dictate2me — One-Page Product Document.md",
-    "docs/prompt.md"
+    "dictate2me/docs/testes.md",
+    "dictate2me/docs/one-page-product-document.md",
+    "dictate2me/docs/guia-tecnico-plugin-obsidian.md",
+    "dictate2me/docs/guia-desenvolvimento-e-testes.md",
+    "docs/prompt.md",
+    "dictate2me/README.md",
+    "dictate2me/src/correction.test.ts",
+    "dictate2me/src/transcription.test.ts",
+    "dictate2me/src/audio.test.ts",
+    "dictate2me/src/correction.ts",
+    "dictate2me/src/transcription.ts",
+    "dictate2me/src/audio.ts",
+    "dictate2me/docs",
+    "dictate2me/dist/main.js",
+    "dictate2me/dist",
+    "dictate2me/package-lock.json",
+    "dictate2me/node_modules/@esbuild/darwin-arm64/README.md",
+    "dictate2me/node_modules/typescript/SECURITY.md",
+    "dictate2me/node_modules/typescript/README.md",
+    "dictate2me/node_modules/esbuild/README.md",
+    "dictate2me/node_modules/esbuild/LICENSE.md",
+    "docs/guia de desenvolvimento e testes - dictate2me.md",
+    "docs/one-page product document - dictate2me.md",
+    "docs/guia técnico - Plugin Obsidian de transcrição local.md",
+    "Untitled.md"
   ]
 }
